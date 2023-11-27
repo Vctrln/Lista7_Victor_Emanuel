@@ -1,0 +1,210 @@
+//(Class Program)
+
+package application;
+
+import entities.Account;
+import entities.WithdrawalException;
+import entities.SavingsAccount;
+import java.util.Scanner;
+
+public class Program {
+
+		public static void main(String[] args) {
+	        Scanner sc = new Scanner(System.in);
+
+	        System.out.println("Enter account data");
+	        System.out.print("Number: ");
+	        int number = sc.nextInt();
+	        System.out.print("Holder: ");
+	        String holder = sc.next();
+	        System.out.print("Initial balance: ");
+	        double balance = sc.nextDouble();
+	        System.out.print("Withdraw limit: ");
+	        double withdrawLimit = sc.nextDouble();
+
+	        Account account = new SavingsAccount(number, holder, balance, withdrawLimit);
+
+	        System.out.println("\nEnter amount for withdraw:");
+	        double withdrawAmount = sc.nextDouble();
+
+	        try {
+	            account.withDraw(withdrawAmount);
+	            System.out.println("New balance: " + account.getBalance());
+	        } catch (WithdrawalException e) {
+	            if (e.getMessage().equals("Not enough balance")) {
+	                System.err.println("Withdraw error: Not enough balance");
+	            } else {
+	                System.err.println("Withdraw error: " + e.getMessage());
+	            }
+	            sc.close();
+	        }
+	    }
+	}
+
+
+
+
+//(Class Account)
+package entities;
+
+public abstract class Account{
+	private Integer number;
+	private String holder;
+	private double balance;
+	private double withDrawLimit;
+	
+	public Account(Integer number, String holder, double balance, 
+				   double withDrawLimit) {
+		
+		this.number = number;
+		this.holder = holder;
+		this.balance = balance;
+		this.withDrawLimit = withDrawLimit;
+	}
+	
+	public Integer getNumber() {
+		return number;
+	}
+	public void setNumber(Integer number) {
+		this.number = number;
+	}
+
+	public String getHolder() {
+		return holder;
+	}
+
+	public void setHolder(String holder) {
+		this.holder = holder;
+	}
+
+	public double getBalance() {
+		return balance;
+	}
+
+	public void setBalance(double balance) {
+		this.balance = balance;
+	}
+	
+	public double getWithDrawLimit() {
+		return withDrawLimit;
+	}
+
+	public void setWithDrawLimit(double withDrawLimit) {
+		this.withDrawLimit = withDrawLimit;
+	}
+
+	public abstract void deposit(double amount);
+
+    public abstract void withDraw(double amount);
+    	
+	}
+
+
+
+
+//(Class Deposit)
+package entities;
+
+public class Deposit extends Account {
+
+    public Deposit(Integer number, String holder, double balance, double withDrawLimit) {
+        super(number, holder, balance, withDrawLimit);
+    }
+
+    @Override
+    public void deposit(double amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Deposit amount must be positive.");
+        }
+
+        setBalance(getBalance() + amount);
+    }
+
+    @Override
+    public void withDraw(double amount) {
+        throw new UnsupportedOperationException("Cannot withdraw from a deposit account.");
+    }
+}
+
+
+
+
+
+//(Class SavingsAccount)
+package entities;
+
+public class SavingsAccount extends Account {
+
+    public SavingsAccount(Integer number, String holder, double balance, double withdrawLimit) {
+        super(number, holder, balance, withdrawLimit);
+    }
+    
+    public void deposit(double amount) {
+        setBalance(getBalance() + amount);
+    }
+
+    @Override
+    public void withDraw(double amount) {
+        if (amount > getWithDrawLimit()) {
+            throw new WithdrawalException("Exceeded withdrawal limit");
+        }
+
+        if (amount > getBalance()) {
+            throw new WithdrawalException("Not enough balance");
+        }
+
+        setBalance(getBalance() - amount);
+    }
+}
+
+
+
+//(Class WithDraw)
+package entities;
+
+public class WithDraw extends Account {
+
+    public WithDraw(Integer number, String holder, double balance, double withDrawLimit) {
+        super(number, holder, balance, withDrawLimit);
+    }
+
+    @Override
+    public void deposit(double amount) {
+        throw new UnsupportedOperationException("Cannot deposit in a withdrawal account.");
+    }
+  @Override
+    public void withDraw(double amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Withdraw amount must be positive");
+        }
+
+        if (amount > getWithDrawLimit()) {
+            throw new WithdrawalException("Withdraw amount exceeds withdraw limit");
+        }
+
+        if (amount > getBalance()) {
+            throw new WithdrawalException("Not enough balance");
+        }
+
+        setBalance(getBalance() - amount);
+    }
+
+    @SuppressWarnings("serial")
+    public static class WithdrawalException extends RuntimeException {
+        public WithdrawalException(String message) {
+            super(message);
+        }
+    }
+}
+
+
+
+//(class WithdrawalException)
+package entities;
+
+@SuppressWarnings("serial")
+public class WithdrawalException extends RuntimeException {
+	    public WithdrawalException(String message) {
+	        super(message);
+	    }
+	}
