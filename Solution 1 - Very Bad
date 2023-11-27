@@ -1,0 +1,181 @@
+//(Class Program)
+public class Program {
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("Enter account data");
+        System.out.print("Number: ");
+        int number = sc.nextInt();
+        System.out.print("Holder: ");
+        String holder = sc.next();
+        System.out.print("Initial balance: ");
+        double balance = sc.nextDouble();
+        System.out.print("Withdraw limit: ");
+        double withdrawLimit = sc.nextDouble();
+
+        Account account;
+        try {
+            account = new SavingsAccount(number, holder, balance, withdrawLimit);
+        } catch (Exception e) {
+            System.err.println("Account creation error: " + e.getMessage());
+            sc.close();
+            return;
+        }
+
+        System.out.println("\nEnter amount for withdraw:");
+        double withdrawAmount = sc.nextDouble();
+
+        account.withDraw(withdrawAmount);
+        System.out.println("New balance: " + account.getBalance());
+        sc.close();
+    }
+}
+
+
+
+
+//(Class Account)
+package entities;
+
+public abstract class Account{
+	private Integer number;
+	private String holder;
+	private double balance;
+	private double withDrawLimit;
+	
+	public Account(Integer number, String holder, double balance, 
+				   double withDrawLimit) {
+		
+		this.number = number;
+		this.holder = holder;
+		this.balance = balance;
+		this.withDrawLimit = withDrawLimit;
+	}
+	
+	public Integer getNumber() {
+		return number;
+	}
+	public void setNumber(Integer number) {
+		this.number = number;
+	}
+
+	public String getHolder() {
+		return holder;
+	}
+
+	public void setHolder(String holder) {
+		this.holder = holder;
+	}
+
+	public double getBalance() {
+		return balance;
+	}
+
+	public void setBalance(double balance) {
+		this.balance = balance;
+	}
+	
+	public double getWithDrawLimit() {
+		return withDrawLimit;
+	}
+
+	public void setWithDrawLimit(double withDrawLimit) {
+		this.withDrawLimit = withDrawLimit;
+	}
+
+	public abstract void deposit(double amount);
+
+    public abstract void withDraw(double amount);
+    
+		
+	}
+
+
+
+
+//(Class Deposit)
+public class Deposit extends Account {
+
+    public Deposit(Integer number, String holder, double balance, double withDrawLimit) {
+        super(number, holder, balance, withDrawLimit);
+    }
+
+    public void deposit(double amount) {
+        if (amount <= 0) {
+            System.err.println("Deposit error: Deposit amount must be positive");
+        }
+    }
+
+    public void withDraw(double amount) {
+        if (amount > getBalance()) {
+            System.err.println("Withdraw error: Not enough balance");
+        } else {
+            setBalance(getBalance() - amount);
+        }
+    }
+}
+
+
+
+//(Class SavingsAccount)
+package entities;
+
+public class SavingsAccount extends Account {
+
+    public SavingsAccount(Integer number, String holder, double balance, double withdrawLimit) {
+        super(number, holder, balance, withdrawLimit);
+    }
+    
+    public void deposit(double amount) {
+        setBalance(getBalance() + amount);
+    }
+
+    @Override
+    public void withDraw(double amount) {
+        if (amount > getWithDrawLimit()) {
+            throw new WithdrawalException("Exceeded withdrawal limit");
+        }
+
+        if (amount > getBalance()) {
+            throw new WithdrawalException("Not enough balance");
+        }
+
+        setBalance(getBalance() - amount);
+    }
+}
+
+
+
+
+//(Class WithDraw)
+public void withDraw(double amount) {
+    if (amount <= 0) {
+        System.err.println("Withdraw error: Withdraw amount must be positive");
+    } else if (amount > getWithDrawLimit()) {
+        System.err.println("Withdraw error: Withdraw amount exceeds withdraw limit");
+    } else if (amount > getBalance()) {
+        System.err.println("Withdraw error: Not enough balance");
+    } else {
+        setBalance(getBalance() - amount);
+    }
+}
+
+
+
+//(Class WithdrawalException)
+public class WithdrawalException extends Exception {
+    public WithdrawalException() {}
+
+    public WithdrawalException(String message) {
+        super(message);
+    }
+
+    public WithdrawalException(Throwable cause) {
+        super(cause);
+    }
+
+    public WithdrawalException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
